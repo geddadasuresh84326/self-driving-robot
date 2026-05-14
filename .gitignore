@@ -6,6 +6,12 @@ __pycache__/
 # C extensions
 *.so
 
+# ros related ignore folders and files
+.vscode/
+install/
+log/
+include/
+
 # Distribution / packaging
 .Python
 build/
