@@ -1,0 +1,81 @@
+<?xml version="1.0"?>
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="my_robot">
+    
+    <!-- <gazebo reference="wheel_right_link">
+        <mu1>100000000000000.0</mu1>
+        <mu2>100000000000000.0</mu2>
+        <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+        <fdirl>1 0 0</fdirl>
+    </gazebo>
+    <gazebo reference="wheel_left_link">
+        <mu1>100000000000000.0</mu1>
+        <mu2>100000000000000.0</mu2>
+        <kp>1000000000000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+        <fdirl>1 0 0</fdirl>
+    </gazebo>
+    <gazebo reference="caster_front_link">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>1000000.0</kp>
+        <kd>100.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+    </gazebo>
+    <gazebo reference="caster_rear_link">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>1000000.0</kp>
+        <kd>100.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+    </gazebo> -->
+    <gazebo reference="base_link">
+        <material>Gazebo/White</material>
+    </gazebo>
+     <gazebo reference="wheel_right_link">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>100000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+        <fdirl>1 0 0</fdirl>
+    </gazebo>
+    <gazebo reference="wheel_left_link">
+        <mu1>1.0</mu1>
+        <mu2>1.0</mu2>
+        <kp>100000.0</kp>
+        <kd>10.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+        <fdirl>1 0 0</fdirl>
+    </gazebo>
+    <gazebo reference="caster_front_link">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>100000.0</kp>
+        <kd>100.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+    </gazebo>
+    <gazebo reference="caster_rear_link">
+        <mu1>0.1</mu1>
+        <mu2>0.1</mu2>
+        <kp>100000.0</kp>
+        <kd>100.0</kd>
+        <minDepth>0.001</minDepth>
+        <maxvel>0.1</maxvel>
+    </gazebo>
+    <gazebo>
+        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+            <parameters>$(find robot_controller)/config/robot_controllers.yaml</parameters>
+            <!-- <robot_param>robot_description</robot_param> -->
+        </plugin>
+    </gazebo>
+</robot>
