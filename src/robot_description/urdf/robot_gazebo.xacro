@@ -35,9 +35,9 @@
         <minDepth>0.001</minDepth>
         <maxvel>0.1</maxvel>
     </gazebo> -->
-    <gazebo reference="base_link">
+    <!-- <gazebo reference="base_link">
         <material>Gazebo/White</material>
-    </gazebo>
+    </gazebo> -->
      <gazebo reference="wheel_right_link">
         <mu1>1.0</mu1>
         <mu2>1.0</mu2>
@@ -73,9 +73,66 @@
         <maxvel>0.1</maxvel>
     </gazebo>
     <gazebo>
-        <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
+        <!-- <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
             <parameters>$(find robot_controller)/config/robot_controllers.yaml</parameters>
-            <!-- <robot_param>robot_description</robot_param> -->
-        </plugin>
+            <robot_param>robot_description</robot_param>
+        </plugin> -->
+
+        <plugin filename="ign_ros2_control-system" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+        <parameters>$(find robot_controller)/config/robot_controllers.yaml</parameters>
+      </plugin>
+      <plugin filename="ignition-gazebo-imu-system" name="ignition::gazebo::systems::Imu">
+      </plugin>
     </gazebo>
+    <!-- IMU -->
+    <gazebo reference="imu_link">
+        <sensor name="imu" type="imu">
+            <always_on>true</always_on>
+            <update_rate>100</update_rate>
+            <gz_frame_id>imu_link</gz_frame_id>
+            <topic>imu</topic>
+            <imu>
+            <angular_velocity>
+                <x>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>2e-4</stddev>
+                </noise>
+                </x>
+                <y>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>2e-4</stddev>
+                </noise>
+                </y>
+                <z>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>2e-4</stddev>
+                </noise>
+                </z>
+            </angular_velocity>
+            <linear_acceleration>
+                <x>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>1.7e-2</stddev>
+                </noise>
+                </x>
+                <y>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>1.7e-2</stddev>
+                </noise>
+                </y>
+                <z>
+                <noise type="gaussian">
+                    <mean>0.0</mean>
+                    <stddev>1.7e-2</stddev>
+                </noise>
+                </z>
+            </linear_acceleration>
+            </imu>
+        </sensor>
+  </gazebo>
 </robot>
