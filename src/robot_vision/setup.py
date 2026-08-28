@@ -1,4 +1,5 @@
 from setuptools import find_packages, setup
+import os
 
 package_name = 'robot_vision'
 
@@ -10,6 +11,7 @@ setup(
         ('share/ament_index/resource_index/packages',
             ['resource/' + package_name]),
         ('share/' + package_name, ['package.xml']),
+        (os.path.join('share', package_name), ['camera_calibration.npz'])
     ],
     install_requires=['setuptools'],
     zip_safe=True,
@@ -25,6 +27,8 @@ setup(
     entry_points={
         'console_scripts': [
             'camera_publisher = robot_vision.camera_publisher:main',
+            'camera_capture = robot_vision.camera_capture:main',
+            'aruco_marker_detection = robot_vision.aruco_marker_detection:main'
         ],
     },
 )
