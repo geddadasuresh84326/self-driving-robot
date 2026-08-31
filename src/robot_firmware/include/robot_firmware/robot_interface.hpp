@@ -5,7 +5,9 @@
 #include <hardware_interface/system_interface.hpp>
 #include <rclcpp_lifecycle/node_interfaces/lifecycle_node_interface.hpp>
 #include <rclcpp_lifecycle/state.hpp>
+#include <libserial/SerialPort.h>
 #include <vector>
+#include <string>
 
 namespace robot_firmware{
     using CallbackReturn = rclcpp_lifecycle::node_interfaces::LifecycleNodeInterface::CallbackReturn;
@@ -29,6 +31,15 @@ namespace robot_firmware{
             virtual hardware_interface::return_type read(const rclcpp::Time &time, const rclcpp::Duration &period) override;
 
             virtual hardware_interface::return_type write(const rclcpp::Time &time, const rclcpp::Duration &period) override;
+
+        private:
+            LibSerial::SerialPort arduino_;
+            std::string port_;
+            std::vector<double> velocity_commands_;
+            std::vector<double> position_states_;
+            std::vector<double> velocity_states_;
+
+            rclcpp::Time last_run_;
     };
 }
 
