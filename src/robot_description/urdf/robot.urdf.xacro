@@ -186,6 +186,8 @@
         <child link="caster_rear_link" />
         <origin xyz="-0.04755 0 -0.0275" rpy="0.0 0.0 0.0" />
     </joint>
+
+    <!-- imu link -->
     <link name="imu_link">
         <inertial>
             <origin xyz="-0.00552433659106688 0.000168210391520346 0.000514000497342681" rpy="0 0 0" />
