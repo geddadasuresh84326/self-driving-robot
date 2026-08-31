@@ -10,7 +10,7 @@ __pycache__/
 .vscode/
 install/
 log/
-include/
+/include/
 
 # Distribution / packaging
 .Python
