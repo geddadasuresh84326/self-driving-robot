@@ -65,8 +65,8 @@ namespace robot_firmware
         return command_interfaces;
     }
     CallbackReturn RobotInterface::on_activate(const rclcpp_lifecycle::State &previous_state)
-    {   
-        (void) previous_state;
+    {
+        (void)previous_state;
         RCLCPP_INFO(rclcpp::get_logger("RobotInterface"), "Starting robot hardware...");
         velocity_commands_ = {0.0, 0.0};
         position_states_ = {0.0, 0.0};
@@ -87,8 +87,8 @@ namespace robot_firmware
     }
 
     CallbackReturn RobotInterface::on_deactivate(const rclcpp_lifecycle::State &previous_state)
-    {   
-        (void) previous_state;
+    {
+        (void)previous_state;
         RCLCPP_INFO(rclcpp::get_logger("RobotInterface"), "Stopping robot hardware...");
         if (arduino_.IsOpen())
         {
@@ -106,12 +106,12 @@ namespace robot_firmware
     }
 
     hardware_interface::return_type RobotInterface::read(const rclcpp::Time &time, const rclcpp::Duration &period)
-    {   
-        (void) time;
-        (void) period;
+    {
+        (void)time;
+        (void)period;
 
         if (arduino_.IsDataAvailable())
-        {   
+        {
             auto dt = (rclcpp::Clock().now() - last_run_).seconds();
             std::string message;
             arduino_.ReadLine(message);
@@ -138,10 +138,10 @@ namespace robot_firmware
     }
 
     hardware_interface::return_type RobotInterface::write(const rclcpp::Time &time, const rclcpp::Duration &period)
-    {   
-        (void) time;
-        (void) period;
-        
+    {
+        (void)time;
+        (void)period;
+
         std::stringstream message_stream;
         char right_wheel_sign = velocity_commands_.at(0) >= 0 ? 'p' : 'n';
         char left_wheel_sign = velocity_commands_.at(1) >= 0 ? 'p' : 'n';
@@ -180,4 +180,4 @@ namespace robot_firmware
 }
 
 #include <pluginlib/class_list_macros.hpp>
-PLUGINLIB_EXPORT_CLASS(robot_firmware::RobotInterface ,hardware_interface::SystemInterface);
+PLUGINLIB_EXPORT_CLASS(robot_firmware::RobotInterface, hardware_interface::SystemInterface);
