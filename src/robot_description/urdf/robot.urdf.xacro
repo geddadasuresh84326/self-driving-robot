@@ -44,7 +44,7 @@
     <joint name="base_joint" type="fixed">
         <parent link="base_footprint" />
         <child link="base_link" />
-        <origin rpy="0 0 0 " xyz="0 0 0.033" />
+        <origin rpy="0 0 0 " xyz="0 0 0.0335" />
     </joint>
 
     <!-- right wheel link and joint -->
@@ -70,7 +70,7 @@
         <collision>
             <origin xyz="0.0 -0.015 0.0" rpy="1.57 0.0 0.0" />
             <geometry>
-                <sphere radius="0.033" />
+                <sphere radius="0.0335" />
             </geometry>
         </collision>
     </link>
@@ -104,7 +104,7 @@
         <collision>
             <origin xyz="0.0 0.015 0.0" rpy="1.57 0.0 0.0" />
             <geometry>
-                <sphere radius="0.033" />
+                <sphere radius="0.0335" />
             </geometry>
         </collision>
     </link>

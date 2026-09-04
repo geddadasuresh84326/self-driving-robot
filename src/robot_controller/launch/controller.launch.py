@@ -8,11 +8,11 @@ def generate_launch_description():
    
     wheel_radius_arg = DeclareLaunchArgument(
         "wheel_radius",
-        default_value="0.033"
+        default_value="0.0335"
     )
     wheel_separation_arg = DeclareLaunchArgument(
         "wheel_separation",
-        default_value="0.17"
+        default_value="0.18"
     )
     use_diff_drive_controller_arg = DeclareLaunchArgument(
         "use_diff_drive_controller",

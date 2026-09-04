@@ -7,7 +7,7 @@ MARKER_DISTANCE_THRESHOLD = 5.2
 ROBOT_HALTING_POINT_DISTANCE = 2.3
 
 # deceleration factor to stop the robot
-DECELERATION_RATE = 0.05
+DECELERATION_RATE = 0.5
 
 MAX_LINEAR_SPEED = 0.4
 MIN_LINEAR_SPEED = 0.15
@@ -28,3 +28,13 @@ MARKER_SIZE = 0.05  # 5 cm marker
 HSV_LOWER_BOUND = np.array([100, 150, 50])
 HSV_UPPER_PBOUND = np.array([130, 255, 200])
 
+# constants to drive the robot 
+
+MAX_LINEAR = 0.104  # 30 RPM
+MIN_LINEAR = 0.078  # 22.6 RPM 
+MIN_WHEEL_SPEED = 0.052  # 15 RPM 
+
+# angular speed scaling factor
+KP = 0.5
+# wheel seperation
+WHEEL_SEPERATION = 0.179
