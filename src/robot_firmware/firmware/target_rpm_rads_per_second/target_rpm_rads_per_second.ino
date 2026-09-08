@@ -203,17 +203,22 @@ void recvWithEndMarker() {
 // Parses the protocol string "rpX.XX,lnX.XX" (Values are in rad/s)
 void parseData() {
   if (newData == true) {
-    char *rpPtr = strstr(receivedChars, "rp");
-    char *lnPtr = strstr(receivedChars, "ln");
+    // Locate the 'r' (right wheel) and 'l' (left wheel) identifiers
+    char *rPtr = strchr(receivedChars, 'r');
+    char *lPtr = strchr(receivedChars, 'l');
 
-    if (rpPtr != NULL && lnPtr != NULL) {
-      // 1. Extract the raw rad/s float values from the serial string
-      float targetRadS_Right = atof(rpPtr + 2);
-      float targetRadS_Left = atof(lnPtr + 2);
+    if (rPtr != NULL && lPtr != NULL) {
+      // 1. Determine sign for Right Wheel ('p' = +1, 'n' = -1)
+      float rightSign = (*(rPtr + 1) == 'n') ? -1.0 : 1.0;
+      float targetRadS_Right = rightSign * atof(rPtr + 2);
+
+      // 2. Determine sign for Left Wheel ('p' = +1, 'n' = -1)
+      float leftSign = (*(lPtr + 1) == 'n') ? -1.0 : 1.0;
+      float targetRadS_Left = leftSign * atof(lPtr + 2);
       
-      // 2. Convert rad/s directly to RPM for the internal PI controller
+      // 3. Convert rad/s directly to RPM for the internal PI controller
       targetRPM_Right = targetRadS_Right * (60.0 / (2.0 * PI));
-      targetRPM_Left = targetRadS_Left * (60.0 / (2.0 * PI));
+      targetRPM_Left  = targetRadS_Left  * (60.0 / (2.0 * PI));
     }
     
     newData = false; 

@@ -36,11 +36,15 @@ namespace robot_firmware
             RCLCPP_FATAL(rclcpp::get_logger("RobotInterface"), "No Serial port provided, Aborting...");
             return CallbackReturn::FAILURE;
         }
-        velocity_commands_.reserve(info_.joints.size());
-        position_states_.reserve(info_.joints.size());
-        velocity_states_.reserve(info_.joints.size());
+        velocity_commands_.resize(info_.joints.size(),0.0);
+        position_states_.resize(info_.joints.size(),0.0);
+        velocity_states_.resize(info_.joints.size(),0.0);
         last_run_ = rclcpp::Clock().now();
 
+        for (size_t i = 0; i < info_.joints.size(); i++)
+        {
+            RCLCPP_INFO(rclcpp::get_logger("RobotInterface"), "Joint Index %zu: %s", i, info_.joints[i].name.c_str());
+        }
         return CallbackReturn::SUCCESS;
     }
 
@@ -68,9 +72,12 @@ namespace robot_firmware
     {
         (void)previous_state;
         RCLCPP_INFO(rclcpp::get_logger("RobotInterface"), "Starting robot hardware...");
-        velocity_commands_ = {0.0, 0.0};
-        position_states_ = {0.0, 0.0};
-        velocity_states_ = {0.0, 0.0};
+        // velocity_commands_ = {0.0, 0.0};
+        // position_states_ = {0.0, 0.0};
+        // velocity_states_ = {0.0, 0.0};
+        std::fill(velocity_commands_.begin(), velocity_commands_.end(), 0.0);
+        std::fill(position_states_.begin(), position_states_.end(), 0.0);
+        std::fill(velocity_states_.begin(), velocity_states_.end(), 0.0);
 
         try
         {
@@ -164,8 +171,10 @@ namespace robot_firmware
         {
             compansate_zeros_left = "";
         }
-        message_stream << std::fixed << std::setprecision(2) << "r" << right_wheel_sign << compansate_zeros_right << std::abs(velocity_commands_.at(0)) << ",l" << left_wheel_sign << compansate_zeros_left << std::abs(velocity_commands_.at(1)) << ",";
-
+        message_stream << std::fixed << std::setprecision(2) << "r" << right_wheel_sign << compansate_zeros_right << std::abs(velocity_commands_.at(0)) << ",l" << left_wheel_sign << compansate_zeros_left << std::abs(velocity_commands_.at(1)) << ",\n";
+        RCLCPP_INFO_STREAM(
+            rclcpp::get_logger("RobotInterface"),
+            "Sending Serial -> " << message_stream.str().c_str());
         try
         {
             arduino_.Write(message_stream.str());

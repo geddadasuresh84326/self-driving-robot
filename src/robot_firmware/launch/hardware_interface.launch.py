@@ -15,8 +15,8 @@ def generate_launch_description():
 
     robot_description = ParameterValue(Command([
         "xacro ",
-        os.path.join(robot_description_pkg,"urdf","robot_description.urdf.xacro"),
-        "is_sim:=False"
+        os.path.join(robot_description_pkg,"urdf","robot.urdf.xacro"),
+        " is_sim:=False"
     ]),
     value_type=str
     )
@@ -40,7 +40,7 @@ def generate_launch_description():
              )
             ]
     )
-    return LaunchDescription(
+    return LaunchDescription([
         robot_state_publisher_node,
         controller_manager
-    )
+    ])

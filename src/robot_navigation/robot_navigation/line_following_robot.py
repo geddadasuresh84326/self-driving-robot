@@ -234,3 +234,19 @@ class LineFollower(Node):
             self.get_logger().info(
                 f"error_px:{error_px} norm:{error_norm:.2f} -> v:{linear_x:.3f} w:{angular_z:.2f} -> RPM r:{rpm_r:.1f} l:{rpm_l:.1f}"
             )
+
+
+def main(args=None):
+    rclpy.init(args=args)
+    node = LineFollower()
+    try:
+        rclpy.spin(node)
+    except KeyboardInterrupt:
+        pass
+    finally:
+        if rclpy.ok():
+            node.destroy_node()
+            rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()

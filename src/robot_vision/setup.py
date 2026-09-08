@@ -3,6 +3,8 @@ import os
 
 package_name = 'robot_vision'
 
+packages = ([package_name, package_name + ".constants"],)
+
 setup(
     name=package_name,
     version='0.0.0',
@@ -28,7 +30,9 @@ setup(
         'console_scripts': [
             'camera_publisher = robot_vision.camera_publisher:main',
             'camera_capture = robot_vision.camera_capture:main',
-            'aruco_marker_detection = robot_vision.aruco_marker_detection:main'
+            'aruco_marker_detection = robot_vision.aruco_marker_detection:main',
+            'line_detection = robot_vision.line_detection:main',
+            'only_line_following = robot_vision.only_line_following:main'
         ],
     },
 )

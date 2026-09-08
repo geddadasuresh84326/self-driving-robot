@@ -2,7 +2,7 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="my_robot">
     <!-- ROS2 Control Setup -->
-    <ros2_control name="GazeboSystem" type="system">
+    <ros2_control name="RobotSystem" type="system">
         <xacro:if value="$(arg is_sim)">
             <hardware>
                 <!-- <plugin>gazebo_ros2_control/GazeboSystem</plugin> -->
