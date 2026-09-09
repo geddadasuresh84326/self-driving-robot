@@ -15,7 +15,7 @@ find_package(cv_bridge REQUIRED)
 # uncomment the following section in order to fill in
 # further dependencies manually.
 # find_package(<dependency> REQUIRED)
-ament_python_install_package(constants)
+# ament_python_install_package(constants)
 ament_python_install_package(${PROJECT_NAME})
 
 install(PROGRAMS
@@ -23,8 +23,8 @@ install(PROGRAMS
        DESTINATION lib/${PROJECT_NAME} 
        RENAME line_follower
 )
-install(DIRECTORY constants 
-        DESTINATION share/${PROJECT_NAME})
+# install(DIRECTORY constants 
+        # DESTINATION share/${PROJECT_NAME})
 
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)

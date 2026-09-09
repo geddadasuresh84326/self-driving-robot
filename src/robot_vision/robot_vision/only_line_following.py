@@ -6,7 +6,7 @@ from rclpy.node import Node
 from cv_bridge import CvBridge
 from geometry_msgs.msg import TwistStamped
 from sensor_msgs.msg import Image
-from constants.constants import (
+from robot_vision.constants.constants import (
     HSV_LOWER_BOUND,
     HSV_UPPER_PBOUND,
     MIN_WHEEL_SPEED,
