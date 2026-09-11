@@ -1,18 +1,29 @@
 // --- Global State ---
 let ros = null;
-let imageSubscriber = null;
+let rawCameraSub = null;
+let arucoCameraSub = null;
 
-// Telemetry counters
-let lastFrameTime = performance.now();
-let frameCount = 0;
+// Telemetry state tracking
+const rawTelemetry = {
+    feed: null,
+    fpsDisplay: null,
+    sizeDisplay: null,
+    lastFrameTime: performance.now(),
+    frameCount: 0
+};
+
+const arucoTelemetry = {
+    feed: null,
+    fpsDisplay: null,
+    sizeDisplay: null,
+    lastFrameTime: performance.now(),
+    frameCount: 0
+};
 
 // DOM Elements
 const statusElement = document.getElementById('connection-status');
 const wsUrlInput = document.getElementById('ws-url');
 const connectBtn = document.getElementById('connect-btn');
-const cameraFeed = document.getElementById('camera-feed');
-const fpsDisplay = document.getElementById('fps-counter');
-const imgSizeDisplay = document.getElementById('img-size');
 const logConsole = document.getElementById('log-console');
 
 // --- Helper Functions ---
@@ -25,11 +36,39 @@ function logMessage(msg, type = 'system-msg') {
     logConsole.scrollTop = logConsole.scrollHeight; // Auto-scroll
 }
 
-function resetMetrics() {
-    fpsDisplay.textContent = '0';
-    imgSizeDisplay.textContent = '0 KB';
-    cameraFeed.src = '';
-    frameCount = 0;
+function resetMetrics(streamObj) {
+    if (streamObj.fpsDisplay) streamObj.fpsDisplay.textContent = '0';
+    if (streamObj.sizeDisplay) streamObj.sizeDisplay.textContent = '0 KB';
+    if (streamObj.feed) streamObj.feed.src = '';
+    streamObj.frameCount = 0;
+}
+
+function initDOMReferences() {
+    rawTelemetry.feed = document.getElementById('raw-camera-feed');
+    rawTelemetry.fpsDisplay = document.getElementById('raw-fps-counter');
+    rawTelemetry.sizeDisplay = document.getElementById('raw-img-size');
+
+    arucoTelemetry.feed = document.getElementById('aruco-camera-feed');
+    arucoTelemetry.fpsDisplay = document.getElementById('aruco-fps-counter');
+    arucoTelemetry.sizeDisplay = document.getElementById('aruco-img-size');
+}
+
+function updateFrameStats(message, telemetryObj) {
+    // Render Base64 encoded JPEG payload
+    telemetryObj.feed.src = 'data:image/jpeg;base64,' + message.data;
+
+    // Calculate size in KB
+    const sizeInKB = (message.data.length * (3 / 4) / 1024).toFixed(1);
+    telemetryObj.sizeDisplay.textContent = `${sizeInKB} KB`;
+
+    // Calculate live FPS
+    telemetryObj.frameCount++;
+    const now = performance.now();
+    if (now - telemetryObj.lastFrameTime >= 1000) {
+        telemetryObj.fpsDisplay.textContent = telemetryObj.frameCount;
+        telemetryObj.frameCount = 0;
+        telemetryObj.lastFrameTime = now;
+    }
 }
 
 // --- ROS Connection Management ---
@@ -45,7 +84,7 @@ function connectROS() {
         connectBtn.textContent = 'Disconnect';
         logMessage('Connected to rosbridge server.', 'success-msg');
 
-        subscribeToCamera();
+        subscribeToStreams();
     });
 
     ros.on('error', (error) => {
@@ -57,17 +96,15 @@ function connectROS() {
         statusElement.className = 'disconnected';
         connectBtn.textContent = 'Connect';
         logMessage('Disconnected from rosbridge server.', 'error-msg');
-        resetMetrics();
+        resetMetrics(rawTelemetry);
+        resetMetrics(arucoTelemetry);
     });
 }
 
 function disconnectROS() {
-    if (imageSubscriber) {
-        imageSubscriber.unsubscribe();
-    }
-    if (ros) {
-        ros.close();
-    }
+    if (rawCameraSub) rawCameraSub.unsubscribe();
+    if (arucoCameraSub) arucoCameraSub.unsubscribe();
+    if (ros) ros.close();
 }
 
 connectBtn.addEventListener('click', () => {
@@ -78,31 +115,34 @@ connectBtn.addEventListener('click', () => {
     }
 });
 
-// --- Camera Subscription ---
-function subscribeToCamera() {
-    imageSubscriber = new ROSLIB.Topic({
+// --- Camera Subscriptions ---
+function subscribeToStreams() {
+    // 1. Raw Camera Stream Subscriber
+    rawCameraSub = new ROSLIB.Topic({
         ros: ros,
-        name: '/camera/image_raw/compressed',
+        name: '/line_detection/stream/compressed',
         messageType: 'sensor_msgs/msg/CompressedImage'
     });
 
-    imageSubscriber.subscribe((message) => {
-        // Render JPEG frame directly from ROS Base64 payload
-        cameraFeed.src = 'data:image/jpeg;base64,' + message.data;
+    rawCameraSub.subscribe((message) => {
+        updateFrameStats(message, rawTelemetry);
+    });
+    logMessage('Subscribed to /line_detection/stream/compressed', 'system-msg');
 
-        // Calculate size in KB
-        const sizeInKB = (message.data.length * (3 / 4) / 1024).toFixed(1);
-        imgSizeDisplay.textContent = `${sizeInKB} KB`;
-
-        // Calculate live FPS
-        frameCount++;
-        const now = performance.now();
-        if (now - lastFrameTime >= 1000) {
-            fpsDisplay.textContent = frameCount;
-            frameCount = 0;
-            lastFrameTime = now;
-        }
+    // 2. ArUco Detection Stream Subscriber
+    arucoCameraSub = new ROSLIB.Topic({
+        ros: ros,
+        name: '/aruco_detection/stream/compressed',
+        messageType: 'sensor_msgs/msg/CompressedImage'
     });
 
-    logMessage('Subscribed to /camera/image_raw/compressed', 'system-msg');
+    arucoCameraSub.subscribe((message) => {
+        updateFrameStats(message, arucoTelemetry);
+    });
+    logMessage('Subscribed to /aruco_detection/stream/compressed', 'system-msg');
 }
+
+// Initialize DOM element tracking on script load
+window.onload = () => {
+    initDOMReferences();
+};

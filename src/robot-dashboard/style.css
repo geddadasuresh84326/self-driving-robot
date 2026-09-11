@@ -82,8 +82,15 @@ button:hover {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    max-width: 900px;
+    max-width: 1400px;
     margin: 0 auto;
+}
+
+.streams-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 20px;
+    width: 100%;
 }
 
 .card {
@@ -96,15 +103,20 @@ button:hover {
 }
 
 .card h2 {
-    font-size: 1.1rem;
+    font-size: 1.05rem;
     margin-top: 0;
     border-bottom: 1px solid var(--border-color);
     padding-bottom: 8px;
 }
 
+.card h2 code {
+    color: var(--accent-color);
+    font-size: 0.85rem;
+}
+
 .camera-container {
     width: 100%;
-    height: 480px;
+    height: 360px;
     background-color: #000;
     display: flex;
     justify-content: center;
@@ -113,7 +125,7 @@ button:hover {
     overflow: hidden;
 }
 
-#camera-feed {
+.camera-container img {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;

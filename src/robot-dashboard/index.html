@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ROS Camera Viewer Dashboard</title>
+    <title>ROS Dual Camera Dashboard</title>
 
     <!-- CSS Stylesheet -->
     <link rel="stylesheet" href="style.css">
@@ -26,17 +26,32 @@
     </header>
 
     <main class="dashboard-grid">
-        <!-- Live Video Stream Panel -->
-        <section class="card camera-card">
-            <h2>Camera Feed <code>(/camera/image_raw/compressed)</code></h2>
-            <div class="camera-container">
-                <img id="camera-feed" src="" alt="Camera Stream Offline" />
-            </div>
-            <div class="telemetry-info">
-                <span>FPS: <strong id="fps-counter">0</strong></span>
-                <span>Frame Size: <strong id="img-size">0 KB</strong></span>
-            </div>
-        </section>
+        <!-- Dual Camera Video Stream Row -->
+        <div class="streams-container">
+            <!-- Screen 1: Raw Camera Feed -->
+            <section class="card camera-card">
+                <h2>Raw Camera <code>(/line_detection/stream/compressed)</code></h2>
+                <div class="camera-container">
+                    <img id="raw-camera-feed" src="" alt="Raw Camera Stream Offline" />
+                </div>
+                <div class="telemetry-info">
+                    <span>FPS: <strong id="raw-fps-counter">0</strong></span>
+                    <span>Frame Size: <strong id="raw-img-size">0 KB</strong></span>
+                </div>
+            </section>
+
+            <!-- Screen 2: ArUco Detection Stream -->
+            <section class="card camera-card">
+                <h2>ArUco Detection <code>(/aruco_detection/stream/compressed)</code></h2>
+                <div class="camera-container">
+                    <img id="aruco-camera-feed" src="" alt="ArUco Stream Offline" />
+                </div>
+                <div class="telemetry-info">
+                    <span>FPS: <strong id="aruco-fps-counter">0</strong></span>
+                    <span>Frame Size: <strong id="aruco-img-size">0 KB</strong></span>
+                </div>
+            </section>
+        </div>
 
         <!-- Connection Logs Panel -->
         <section class="card log-card">
