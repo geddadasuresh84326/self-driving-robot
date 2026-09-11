@@ -8,7 +8,7 @@ import rclpy
 from rclpy.node import Node
 from cv_bridge import CvBridge
 from geometry_msgs.msg import TwistStamped
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image,CompressedImage
 from ament_index_python.packages import get_package_share_directory
 from rclpy.qos import (
     QoSProfile,
@@ -42,13 +42,8 @@ class LineFollower(Node):
         self.pub_ = self.create_publisher(
             TwistStamped, "robot_diff_drive_controller/cmd_vel", 10
         )
-        qos_best_effort = QoSProfile(
-            reliability=QoSReliabilityPolicy.BEST_EFFORT,
-            history=QoSHistoryPolicy.KEEP_LAST,
-            depth=1,
-        )
         self.image_pub_ = self.create_publisher(
-            Image, "line_detection/debug_image", qos_best_effort
+            CompressedImage, "line_detection/stream/compressed", qos_profile_sensor_data
         )
 
         # Vision & Calibration Config
@@ -73,7 +68,7 @@ class LineFollower(Node):
         # GStreamer pipeline with max-buffers=1
         self.gstreamer_pipeline = (
             "libcamerasrc ! "
-            "video/x-raw, format=NV12, width=640, height=360, framerate=30/1 ! "
+            "video/x-raw, format=NV12, width=360, height=240, framerate=30/1 ! "
             "videoconvert ! video/x-raw, format=BGR ! "
             "appsink drop=true max-buffers=1 sync=false"
         )
@@ -190,11 +185,11 @@ class LineFollower(Node):
 
             # 2. Check turn or stop logic based on marker detection
             if marker_id is not None and aruco_distance is not None:
-                if marker_id == 1 and aruco_distance < MARKER_DISTANCE_THRESHOLD:
+                if marker_id == 1:
                     frame[:, : w // 2] = 0  # Force turn right
-                elif marker_id == 0 and aruco_distance < MARKER_DISTANCE_THRESHOLD:
+                elif marker_id == 0:
                     frame[:, w // 2 :] = 0  # Force turn left
-                elif marker_id == 2 and aruco_distance < ROBOT_HALTING_POINT_DISTANCE:
+                elif marker_id == 2:
                     if self.state == "FOLLOWING":
                         self.state = "DECELERATING"
                     self.get_logger().info(
@@ -271,8 +266,21 @@ class LineFollower(Node):
                 self.pub_.publish(cmd)
 
             # Publish debug visualization image
-            ros_img = self.cv_bridge.cv2_to_imgmsg(debug_img, encoding="bgr8")
-            self.image_pub_.publish(ros_img)
+            # ros_img = self.cv_bridge.cv2_to_imgmsg(debug_img, encoding="bgr8")
+            ret,buffer = cv2.imencode(".jpg",debug_img,[int(cv2.IMWRITE_JPEG_QUALITY),75])
+            if not ret:
+                self.get_logger().error("Error occurred when publishing stream")
+                return
+            msg = CompressedImage()
+            msg.header.stamp = self.get_clock().now().to_msg()
+            msg.header.frame_id = "camera_link"
+            msg.format = "jpeg"
+            msg.data = buffer.tobytes()
+            try:
+                self.image_pub_.publish(msg)
+            except rclpy._rclpy_pybind11.RCLError:
+                pass
+            # self.image_pub_.publish(ros_img)
         except Exception as e:
             self.get_logger().error(f"timer crash: {e}")
             import traceback

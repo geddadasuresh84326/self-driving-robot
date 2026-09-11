@@ -1,4 +1,5 @@
 import signal
+import sys
 
 import rclpy
 from rclpy.node import Node
@@ -31,7 +32,8 @@ class CameraPublisher(Node):
         self.cap = cv2.VideoCapture(gst_pipeline, cv2.CAP_GSTREAMER)
         if not self.cap.isOpened():
             self.get_logger().error("Failed to open camera via GStreamer!")
-            return
+          
+            raise RuntimeError("Failed to open camera via GStreamer pipeline")
 
         self.get_logger().info(
             "Camera opened successfully! Publishing to /camera/image_raw/compressed"
@@ -71,7 +73,13 @@ class CameraPublisher(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = CameraPublisher()
+
+    try:
+        node = CameraPublisher()
+    except RuntimeError as e:
+        print(f"Camera init failed: {e}")
+        rclpy.shutdown()
+        sys.exit(1)
 
     def _handle_sigterm(signum, frame):
         raise KeyboardInterrupt
