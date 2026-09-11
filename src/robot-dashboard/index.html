@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ROS Camera Viewer Dashboard</title>
+
+    <!-- CSS Stylesheet -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- ROSLIBJS for ROS Web Bridge Communication -->
+    <script src="https://cdn.jsdelivr.net/npm/roslib@1/build/roslib.min.js"></script>
+</head>
+
+<body>
+
+    <!-- Header / Connection Control -->
+    <header>
+        <h1>Robot Camera Dashboard</h1>
+        <div id="connection-container">
+            <span id="connection-status" class="disconnected">Disconnected</span>
+            <input type="text" id="ws-url" value="ws://192.168.1.6:9090" placeholder="ws://<ROBOT_IP>:9090">
+            <button id="connect-btn">Connect</button>
+        </div>
+    </header>
+
+    <main class="dashboard-grid">
+        <!-- Live Video Stream Panel -->
+        <section class="card camera-card">
+            <h2>Camera Feed <code>(/camera/image_raw/compressed)</code></h2>
+            <div class="camera-container">
+                <img id="camera-feed" src="" alt="Camera Stream Offline" />
+            </div>
+            <div class="telemetry-info">
+                <span>FPS: <strong id="fps-counter">0</strong></span>
+                <span>Frame Size: <strong id="img-size">0 KB</strong></span>
+            </div>
+        </section>
+
+        <!-- Connection Logs Panel -->
+        <section class="card log-card">
+            <h2>Connection Logs</h2>
+            <div id="log-console">
+                <p class="system-msg">[System] Ready to connect to rosbridge server.</p>
+            </div>
+        </section>
+    </main>
+
+    <!-- Main Logic JavaScript -->
+    <script src="app.js"></script>
+</body>
+
+</html>
