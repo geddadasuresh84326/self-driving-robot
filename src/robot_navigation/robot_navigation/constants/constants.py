@@ -16,10 +16,6 @@ MIN_LINEAR_SPEED = 0.15
 # To control robot speed at curves
 ANGULAR_SPEED_SCALING_FACTOR = 0.8
 
-# Controller gains
-KP = 0.001  # Proportional gain
-KI = 0.0  # Integral gain
-KD = 0.0  # Derivative gain
 
 CALIB_FILE_DIRECTORY = "robot_vision"
 CALIB_FILE_NAME = "camera_calibration.npz"
@@ -37,6 +33,7 @@ MIN_LINEAR = 0.09  # 22.6 RPM
 MIN_WHEEL_SPEED = 0.0  # 15 RPM 
 
 # angular speed scaling factor
-KP = 0.4
+KP = 0.9
+KD = 0.1
 # wheel seperation
 WHEEL_SEPERATION = 0.179

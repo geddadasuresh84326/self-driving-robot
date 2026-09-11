@@ -30,6 +30,7 @@ from robot_navigation.constants.constants import (
     MAX_LINEAR,
     MIN_LINEAR,
     KP,
+    KD,
     WHEEL_SEPERATION,
 )
 
@@ -42,9 +43,12 @@ class LineFollower(Node):
         self.pub_ = self.create_publisher(
             TwistStamped, "robot_diff_drive_controller/cmd_vel", 10
         )
-        self.image_pub_ = self.create_publisher(
+        self.line_pub_ = self.create_publisher(
             CompressedImage, "line_detection/stream/compressed", qos_profile_sensor_data
         )
+        self.aruco_pub_ = self.create_publisher(
+                    CompressedImage, "aruco_detection/stream/compressed", qos_profile_sensor_data
+                )
 
         # Vision & Calibration Config
         self.cv_bridge = CvBridge()
@@ -64,6 +68,8 @@ class LineFollower(Node):
         self.state = "FOLLOWING"
         self.last_linear_speed = 0.10
         self.stop_counter = 0
+        self.prev_error_norm = 0.0
+        self.last_time = self.get_clock().now()
 
         # GStreamer pipeline with max-buffers=1
         self.gstreamer_pipeline = (
@@ -121,7 +127,8 @@ class LineFollower(Node):
             self.dist_coeffs = np.zeros((1, 5), dtype=np.float64)
 
     def aruco_detection(self, cv_image):
-        gray = cv2.cvtColor(cv_image, cv2.COLOR_BGR2GRAY)
+        annotated_img = cv_image.copy()
+        gray = cv2.cvtColor(annotated_img, cv2.COLOR_BGR2GRAY)
         try:
 
             corners, ids, _ = cv2.aruco.detectMarkers(
@@ -129,23 +136,23 @@ class LineFollower(Node):
             )
         except Exception as e:
             self.get_logger().error(f"Aruco error: {e}", throttle_duration_sec=1.0)
-            return None, None
+            return None, None,annotated_img
         if ids is not None:
-            cv2.aruco.drawDetectedMarkers(cv_image, corners, ids)
+            cv2.aruco.drawDetectedMarkers(annotated_img, corners, ids)
             rvecs, tvecs, _ = cv2.aruco.estimatePoseSingleMarkers(
                 corners, self.marker_size, self.camera_matrix, self.dist_coeffs
             )
             for rvec, tvec, id in zip(rvecs, tvecs, ids):
                 cv2.drawFrameAxes(
-                    cv_image,
+                    annotated_img,
                     self.camera_matrix,
                     self.dist_coeffs,
                     rvec,
                     tvec,
                     self.marker_size * 0.5,
                 )
-                return tvec[0][2], int(id[0])
-        return None, None
+                return tvec[0][2], int(id[0]),annotated_img
+        return None, None,annotated_img
 
     def line_segmentation(self, cv_image):
         hsv_img = cv2.cvtColor(cv_image, cv2.COLOR_BGR2HSV)
@@ -181,7 +188,9 @@ class LineFollower(Node):
             h, w = frame.shape[:2]
 
             # 1. Detect ArUco markers for the current frame
-            aruco_distance, marker_id = self.aruco_detection(cv_image=frame)
+            aruco_distance, marker_id, aruco_img = self.aruco_detection(
+                cv_image=frame
+            )
 
             # 2. Check turn or stop logic based on marker detection
             if marker_id is not None and aruco_distance is not None:
@@ -231,8 +240,10 @@ class LineFollower(Node):
             line = self.get_contours(mask)
 
             debug_img = blue_roi_img.copy()
-
-            if line:
+            now = self.get_clock().now()
+            dt = (now-self.last_time).nanoseconds/1e9 #time in seconds
+            self.last_time = now
+            if line and dt>0:
                 x = line["x"]
                 y = line["y"]
                 error_px = x - w // 2
@@ -240,9 +251,11 @@ class LineFollower(Node):
 
                 cv2.circle(debug_img, (x, y), 6, (0, 0, 255), -1)
 
+                derivative = (error_norm - self.prev_error_norm)/dt
+                self.prev_error_norm = error_norm
                 linear_x = MAX_LINEAR - abs(error_norm) * (MAX_LINEAR - MIN_LINEAR)
                 self.last_linear_speed = float(linear_x)
-                angular_z = -KP * error_norm
+                angular_z = -(KP * error_norm + KD * derivative)
 
                 max_w = (linear_x - MIN_WHEEL_SPEED) * 2.0 / WHEEL_SEPERATION
                 angular_z = float(np.clip(angular_z, -max_w, max_w))
@@ -254,7 +267,7 @@ class LineFollower(Node):
                 cmd.twist.angular.z = float(angular_z)
                 self.pub_.publish(cmd)
                 self.get_logger().info(
-                                f"error:{error_px} norm:{error_norm:.2f} v:{linear_x:.3f} w:{angular_z:.2f}"
+                                f"error:{error_px} norm:{error_norm:.2f} v:{linear_x:.3f} w:{angular_z:.2f} marker id : {marker_id}"
                             )
             else:
                 # Fallback stop if line is lost during FOLLOWING state
@@ -277,10 +290,27 @@ class LineFollower(Node):
             msg.format = "jpeg"
             msg.data = buffer.tobytes()
             try:
-                self.image_pub_.publish(msg)
+                self.line_pub_.publish(msg)
             except rclpy._rclpy_pybind11.RCLError:
                 pass
-            # self.image_pub_.publish(ros_img)
+            # self.line_pub_.publish(ros_img)
+
+            # publishing aruco detection stream
+            ret, buffer = cv2.imencode(
+                ".jpg", aruco_img, [int(cv2.IMWRITE_JPEG_QUALITY), 75]
+            )
+            if not ret:
+                self.get_logger().error("Error occurred when publishing stream")
+                return
+            aruco_msg = CompressedImage()
+            aruco_msg.header.stamp = self.get_clock().now().to_msg()
+            aruco_msg.header.frame_id = "camera_link"
+            aruco_msg.format = "jpeg"
+            aruco_msg.data = buffer.tobytes()
+            try:
+                self.aruco_pub_.publish(aruco_msg)
+            except rclpy._rclpy_pybind11.RCLError:
+                pass
         except Exception as e:
             self.get_logger().error(f"timer crash: {e}")
             import traceback
