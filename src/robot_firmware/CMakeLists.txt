@@ -7,10 +7,13 @@ endif()
 
 # find dependencies
 find_package(ament_cmake REQUIRED)
+find_package(ament_cmake_python REQUIRED)
 find_package(rclcpp REQUIRED)
 find_package(hardware_interface REQUIRED)
 find_package(rclcpp_lifecycle REQUIRED)
 find_package(pluginlib REQUIRED)
+
+ament_python_install_package(${PROJECT_NAME})
 
 pkg_check_modules(SERIAL libserial)
 
@@ -39,7 +42,12 @@ install (DIRECTORY include
 
 install(DIRECTORY launch
         DESTINATION share/${PROJECT_NAME})
-        
+
+install(PROGRAMS
+       ${PROJECT_NAME}/mpu6050_driver.py
+       DESTINATION lib/${PROJECT_NAME} 
+       RENAME imu_driver
+)
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   # the following line skips the linter which checks for copyrights
