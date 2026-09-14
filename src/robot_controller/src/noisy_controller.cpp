@@ -102,7 +102,8 @@ void NoisyController::jointCallback(const sensor_msgs::msg::JointState &msg){
     transform_stamped_.header.stamp = get_clock()->now();
     
     odom_pub_->publish(odom_msg_);
-    
+    transform_broadcaster_->sendTransform(transform_stamped_);
+
     RCLCPP_INFO_STREAM(get_logger(),"x : " << x_ << " y : " << y_ << " theta : " <<theta_);
 }
 int main(int argc, char * argv[]){
