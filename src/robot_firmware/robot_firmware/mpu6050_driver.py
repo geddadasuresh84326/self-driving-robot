@@ -4,30 +4,32 @@ from rclpy.node import Node
 from sensor_msgs.msg import Imu
 import smbus
 
-PWR_MGMT_1     = 0x6B
-SMPLRT_DIV     = 0x19
-CONFIG         = 0x1A
-GYRO_CONFIG    = 0x1B
-INT_ENABLE     = 0x38
-ACCEL_XOUT_H   = 0x3B
-ACCEL_YOUT_H   = 0x3D
-ACCEL_ZOUT_H   = 0x3F
-GYRO_YOUT_H    = 0x45
-GYRO_ZOUT_H    = 0x47
-GYRO_XOUT_H    = 0x43
+PWR_MGMT_1 = 0x6B
+SMPLRT_DIV = 0x19
+CONFIG = 0x1A
+GYRO_CONFIG = 0x1B
+INT_ENABLE = 0x38
+ACCEL_XOUT_H = 0x3B
+ACCEL_YOUT_H = 0x3D
+ACCEL_ZOUT_H = 0x3F
+GYRO_YOUT_H = 0x45
+GYRO_ZOUT_H = 0x47
+GYRO_XOUT_H = 0x43
 DEVICE_ADDRESS = 0x68
 
-class MPU6050DRIVER (Node):
+
+class MPU6050DRIVER(Node):
     def __init__(self):
         super().__init__("mpu6050_driver")
-        self.pub_ = self.create_publisher(Imu,"imu/out",10)
+        self.pub_ = self.create_publisher(Imu, "imu/out", 10)
         self.imu_msg_ = Imu()
         self.imu_msg_.header.frame_id = "base_footprint"
         self.is_connected_ = False
         self.init_i2c()
 
         self.frequency_ = 0.01
-        self.timer_ = self.create_timer(self.frequency_,self.timerCallback)
+        self.timer_ = self.create_timer(self.frequency_, self.timerCallback)
+        self.get_logger().info("mpu driver started")
 
     def timerCallback(self):
         try:
@@ -51,27 +53,44 @@ class MPU6050DRIVER (Node):
             self.imu_msg_.angular_velocity.y = gyro_y / 7509.55
             self.imu_msg_.angular_velocity.z = gyro_z / 7509.55
 
-            self.pub_.publish(self.imu_msg)
+            self.pub_.publish(self.imu_msg_)
+
         except OSError:
+            self.get_logger().error(
+                "error occurred in timer callback function , unable to read data from device"
+            )
             self.is_connected_ = False
 
     def init_i2c(self):
         try:
             self.bus_ = smbus.SMBus(1)
-            self.bus_.write_byte_data(DEVICE_ADDRESS,SMPLRT_DIV,7)
-            self.bus_.write_byte_data(DEVICE_ADDRESS,PWR_MGMT_1,1)
-            self.bus_.write_byte_data(DEVICE_ADDRESS,CONFIG,0)
-            self.bus_.write_byte_data(DEVICE_ADDRESS,GYRO_CONFIG,24)
-            self.bus_.write_byte_data(DEVICE_ADDRESS,INT_ENABLE,1)
+            self.bus_.write_byte_data(DEVICE_ADDRESS, SMPLRT_DIV, 7)
+            self.bus_.write_byte_data(DEVICE_ADDRESS, PWR_MGMT_1, 1)
+            self.bus_.write_byte_data(DEVICE_ADDRESS, CONFIG, 0)
+            self.bus_.write_byte_data(DEVICE_ADDRESS, GYRO_CONFIG, 24)
+            self.bus_.write_byte_data(DEVICE_ADDRESS, INT_ENABLE, 1)
             self.is_connected_ = True
         except OSError:
+            self.get_logger().error(
+                "error occurred in init_i2c function , unable to connect to device"
+            )
             self.is_connected_ = False
 
-    def read_raw_data(self,addr):
-        high = self.bus_.read_byte_data(DEVICE_ADDRESS,addr)
-        low = self.bus_.read_byte_data(DEVICE_ADDRESS,addr + 1)
+    def read_raw_data(self, addr):
+        high = self.bus_.read_byte_data(DEVICE_ADDRESS, addr)
+        low = self.bus_.read_byte_data(DEVICE_ADDRESS, addr + 1)
 
-        value = ((high  << 8 ) | low)
+        value = (high << 8) | low
         if value > 32768:
             value = value - 65536
         return value
+
+def main():
+    rclpy.init()
+    imu_driver = MPU6050DRIVER()
+    rclpy.spin(imu_driver)
+    imu_driver.destroy_node()
+    rclpy.shutdown()
+
+if __name__ == "__main__":
+    main()

@@ -13,12 +13,13 @@ def generate_launch_description():
     # pkg_share_dir = get_package_share_directory("self_driving_pkg")
     # model_share_dir = os.path.join(pkg_share_dir,"models")
 
+    
     model_arg = DeclareLaunchArgument(
         name="model",
         default_value=os.path.join(robot_description_dir,"urdf","robot.urdf.xacro"),
         description="Absolute path to the urdf model"
     )
-    
+
     gazebo_resource_path = SetEnvironmentVariable(
         name="GZ_SIM_RESOURCE_PATH",
         value=[
@@ -29,7 +30,7 @@ def generate_launch_description():
         "xacro ", LaunchConfiguration('model'),
         ]),
         value_type=str)
-    
+
     # gazebo_world_arg = DeclareLaunchArgument(
     #     "world",
     #     default_value=os.path.join(get_package_share_directory("self_driving_pkg"),"worlds","line_aruco2.world"),
@@ -43,13 +44,13 @@ def generate_launch_description():
     robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        parameters=[{"robot_description":robot_description}]
+        parameters=[{"robot_description":robot_description,'use_sim_time': True}]
     )
     joint_state_publisher = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher',
-        parameters=[{'source_list': ['joint_states']}]
+        parameters=[{'source_list': ['joint_states'], 'use_sim_time': True}]
     )
     gazebo = IncludeLaunchDescription(
                     PythonLaunchDescriptionSource([os.path.join(
@@ -67,9 +68,9 @@ def generate_launch_description():
             arguments=["-topic", "robot_description",
                     "-name", "autonomous_robot"],
         )
-    # GAZEBO_MODEL_PATH 
+    # GAZEBO_MODEL_PATH
     # os.environ['GAZEBO_MODEL_PATH'] = (
-        # os.environ.get("GAZEBO_MODEL_PATH",'') + os.pathsep + model_share_dir )
+    # os.environ.get("GAZEBO_MODEL_PATH",'') + os.pathsep + model_share_dir )
     # gazebo server
     # gzserver_node = IncludeLaunchDescription(
     #     PythonLaunchDescriptionSource(
@@ -87,7 +88,7 @@ def generate_launch_description():
     # spawn_entity_node = Node(
     #     package='gazebo_ros',
     #     executable='spawn_entity.py',
-    #     arguments=['-topic', 'robot_description', 
+    #     arguments=['-topic', 'robot_description',
     #                '-entity', 'self_driving_robot',
     #                '-x', '-3.4',    # X position
     #                '-y', '-4.6',    # Y position
@@ -97,11 +98,12 @@ def generate_launch_description():
     #     output='screen'
     # )
     rviz_node = Node(
-        package='rviz2',
-        executable='rviz2',
-        name='rviz2',
-        arguments=['-d', LaunchConfiguration('rviz_config')],
-        output='screen'
+        package="rviz2",
+        executable="rviz2",
+        name="rviz2",
+        arguments=["-d", LaunchConfiguration("rviz_config")],
+        parameters=[{"use_sim_time": True}],
+        output="screen",
     )
     # controller_manager = Node(
     #     package="controller_manager",
