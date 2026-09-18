@@ -12,8 +12,12 @@ def generate_launch_description():
     robot_description_dir = get_package_share_directory("robot_description")
     # pkg_share_dir = get_package_share_directory("self_driving_pkg")
     # model_share_dir = os.path.join(pkg_share_dir,"models")
-
-    
+    use_sim_time_arg = DeclareLaunchArgument(
+        "use_sim_time",
+        default_value="True",
+        description="this is set to use the simulation time"
+    )
+    use_sim_time = LaunchConfiguration("use_sim_time")
     model_arg = DeclareLaunchArgument(
         name="model",
         default_value=os.path.join(robot_description_dir,"urdf","robot.urdf.xacro"),
@@ -44,13 +48,13 @@ def generate_launch_description():
     robot_state_publisher = Node(
         package="robot_state_publisher",
         executable="robot_state_publisher",
-        parameters=[{"robot_description":robot_description,'use_sim_time': True}]
+        parameters=[{"robot_description":robot_description,'use_sim_time': use_sim_time}]
     )
     joint_state_publisher = Node(
         package='joint_state_publisher',
         executable='joint_state_publisher',
         name='joint_state_publisher',
-        parameters=[{'source_list': ['joint_states'], 'use_sim_time': True}]
+        parameters=[{'source_list': ['joint_states'], 'use_sim_time': use_sim_time}]
     )
     gazebo = IncludeLaunchDescription(
                     PythonLaunchDescriptionSource([os.path.join(
@@ -102,7 +106,7 @@ def generate_launch_description():
         executable="rviz2",
         name="rviz2",
         arguments=["-d", LaunchConfiguration("rviz_config")],
-        parameters=[{"use_sim_time": True}],
+        parameters=[{"use_sim_time": use_sim_time}],
         output="screen",
     )
     # controller_manager = Node(
@@ -126,6 +130,7 @@ def generate_launch_description():
         ]
     )
     return LaunchDescription([
+        use_sim_time_arg,
         rviz_config_arg,
         # gazebo_world_arg,
         gazebo_resource_path,
