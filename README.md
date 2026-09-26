@@ -23,26 +23,10 @@ An autonomous mobile robot built for vision-based line tracking and ArUco marker
 | <img src="docs/images/img1.png" width="80%" alt="Gazebo World"/> | <img src="docs/images/img2.png" width="100%" alt="RViz"/> |
 
 #### Simulation Demo
-
-<video width="100%" controls autoplay muted loop>
-  <source src="docs/videos/sim_demo.mp4" type="video/mp4">
-  Your browser does not support video. <a href="docs/videos/simulation_demo.mp4">Download MP4</a>
-</video>
-[![Robot Navigation Demo](images/demo_thumbnail.png)](https://www.youtube.com/watch?v=YOUR_VIDEO_ID)
+(https://youtu.be/IGIriw_DM40)
 
 #### Hardware Demo
-
-<video width="100%" controls autoplay muted loop>
-  <source src="docs/videos/real_hardware_demo.mp4" type="video/mp4">
-  Your browser does not support video. <a href="docs/videos/real_hardware_demo.mp4">Download MP4</a>
-</video>
-
-#### Line Detection and Aruco Marker Detection camera stream
-
-<video width="100%" controls autoplay muted loop>
-  <source src="docs/videos/camera_stream.mp4" type="video/mp4">
-  Your browser does not support video. <a href="docs/videos/camera_stream.mp4">Download MP4</a>
-</video>
+(https://youtu.be/oh3cuF6qTDI)
 
 ---
 
