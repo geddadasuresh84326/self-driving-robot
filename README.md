@@ -28,6 +28,7 @@ An autonomous mobile robot built for vision-based line tracking and ArUco marker
   <source src="docs/videos/sim_demo.mp4" type="video/mp4">
   Your browser does not support video. <a href="docs/videos/simulation_demo.mp4">Download MP4</a>
 </video>
+[simulation demo](docs/videos/sim_demo.gif)
 
 #### Hardware Demo
 
@@ -177,4 +178,3 @@ Edit `scripts/line_follower.py`:
 - `KP=0.8`, `KD=0.2` → tune on track
 
 ---
-
